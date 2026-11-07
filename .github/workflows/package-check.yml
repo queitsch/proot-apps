@@ -54,4 +54,4 @@ jobs:
           git config --global user.email 'package-bot@users.noreply.github.com'
           cd apps
           git add .
-          git diff --quiet HEAD || git commit -m "Bot Updating Package Versions" && git push origin master
+          git diff --quiet HEAD || git commit -m "Bot Updating Package Versions" && git push origin main

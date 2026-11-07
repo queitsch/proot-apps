@@ -13,27 +13,23 @@ A [[https://github.com/linuxserver/proot-apps][PRoot Apps]] repository laid out 
 
 * Adding this repository to SealSkin
 
+This repository's default branch is ~main~. SealSkin's GitHub ~owner/repo~
+shorthand always reads the metadata from ~master~ (see ~Remote.parse~ in
+SealSkin's [[https://github.com/selkies-project/sealskin/blob/main/server/app/prootapps.py][server/app/prootapps.py]]), so add the repository in the form a remote
+also accepts: the base URL ~metadata/~ is served under and the registry of the
+images, one space apart.
+
 In the SealSkin admin UI, open the PRoot Apps catalogs, click *New Catalog*, and
 set the remote to:
 
 #+begin_example
-queitsch/proot-apps
+https://raw.githubusercontent.com/queitsch/proot-apps/main ghcr.io/queitsch/proot-apps
 #+end_example
 
-SealSkin reads a GitHub ~owner/repo~ remote as
-~https://raw.githubusercontent.com/<owner>/<repo>/master/metadata/metadata.yml~,
-with the icons under ~metadata/img/~. It installs the first layer of the image
-~ghcr.io/<owner>/<repo>:<name>~ (see ~Remote.parse~ in SealSkin's
-[[https://github.com/selkies-project/sealskin/blob/main/server/app/prootapps.py][server/app/prootapps.py]]). So the metadata has to be on ~master~, and the
-images have to be public on ghcr.io or pullable with the node's ghcr.io
-credential.
-
-A remote can also be a base URL and a registry, one space apart. That form
-serves the metadata from any branch:
-
-#+begin_example
-https://raw.githubusercontent.com/queitsch/proot-apps/<branch> ghcr.io/queitsch/proot-apps
-#+end_example
+SealSkin then reads ~metadata/metadata.yml~ and the icons under ~metadata/img/~
+from that base URL, and installs the first layer of the image
+~ghcr.io/queitsch/proot-apps:<name>~. The images have to be public on ghcr.io or
+pullable with the node's ghcr.io credential.
 
 * For Users
 
@@ -69,7 +65,7 @@ built here. Set the ~BASE_REPO~ build argument to use the base images of
 another repository.
 
 - ~build-on-commit~ builds every app whose ~apps/<name>/~ folder changed on a
-  push to ~master~ and pushes it to ~ghcr.io/<owner>/<repo>:<name>~ for the
+  push to ~main~ and pushes it to ~ghcr.io/<owner>/<repo>:<name>~ for the
   architectures in ~metadata/metadata.yml~. Run it by hand with /Build and push
   all apps/ to build everything.
 - ~Daily Package check~ rebuilds each app with [[https://github.com/anchore/syft][syft]] and commits a changed
