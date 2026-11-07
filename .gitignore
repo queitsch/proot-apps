@@ -1,0 +1,6 @@
+# Ignore editor files:
+*~
+*.swp
+*.swo
+\#*\#
+.\#*
