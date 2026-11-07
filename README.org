@@ -1,40 +1,19 @@
 #+TITLE: PRoot Apps
 
-A [[https://github.com/linuxserver/proot-apps][PRoot Apps]] repository built the same way as linuxserver/proot-apps, so it
-can be added to a [[https://github.com/selkies-project/sealskin][SealSkin]] PRoot Apps catalog by its GitHub ~owner/repo~.
+# This file is generated from ci-scripts/README.template and metadata/metadata.yml, edit those instead
 
-* Apps
+A [[https://github.com/linuxserver/proot-apps][PRoot Apps]] repository laid out like linuxserver/proot-apps. A
+[[https://github.com/selkies-project/sealskin][SealSkin]] PRoot Apps catalog can use it as a remote by its GitHub ~owner/repo~.
 
-| Name  | Full endpoint                         | Category    | Arch                    |
-|-------+---------------------------------------+-------------+-------------------------|
-| emacs | ~ghcr.io/queitsch/proot-apps:emacs~   | Development | linux/amd64,linux/arm64 |
+* Supported Apps
 
-** emacs
-
-GNU Emacs from Alpine 3.24 (~emacs-pgtk~ and ~emacs-gtk3~, Emacs 30.2). The
-image holds two builds of the same release:
-
-| Binary                         | Build          | Used when                                |
-|--------------------------------+----------------+------------------------------------------|
-| ~/usr/bin/emacs~               | pure GTK, pgtk | the session has a Wayland display        |
-| ~/usr/libexec/emacs-x11/emacs~ | GTK3 on X11    | there is no Wayland socket but ~DISPLAY~ is set |
-
-The entrypoint prefers Wayland: it starts the pgtk build when
-~$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY~ (or an absolute ~WAYLAND_DISPLAY~) is a
-socket, and the X11 build otherwise. Set ~PA_EMACS_BACKEND=pgtk~ or
-~PA_EMACS_BACKEND=x11~ to force one.
-
-Alpine's ~emacs-pgtk~ and ~emacs-gtk3~ packages conflict, so the X11 binary and
-its dump file come from a second build stage. Both packages ship
-byte-identical Lisp. Only the binary and its fingerprint-named ~.pdmp~ differ,
-so the two dump files sit side by side in ~/usr/lib/emacs/30.2/<triplet>/~.
-
-On install the app adds an ~Emacs PA~ start menu entry and desktop shortcut.
-It also adds ~emacs-pa~ to ~$HOME/.local/bin~ for the command line.
+| Name | Full Endpoint | Category | Arch | Description |
+|------+---------------+----------+------+-------------|
+| emacs | ghcr.io/queitsch/proot-apps:emacs | Development | linux/amd64,linux/arm64 | GNU Emacs is an extensible, customizable, self-documenting real-time display editor. This app runs the pure GTK build natively on Wayland and switches to the GTK3 X11 build when the session has no Wayland display. |
 
 * Adding this repository to SealSkin
 
-In the SealSkin admin UI open the PRoot Apps catalogs, click *New Catalog* and
+In the SealSkin admin UI, open the PRoot Apps catalogs, click *New Catalog*, and
 set the remote to:
 
 #+begin_example
@@ -43,69 +22,81 @@ queitsch/proot-apps
 
 SealSkin reads a GitHub ~owner/repo~ remote as
 ~https://raw.githubusercontent.com/<owner>/<repo>/master/metadata/metadata.yml~,
-with the icons under ~metadata/img/~. It installs the apps as the images
-~ghcr.io/<owner>/<repo>:<name>~ and uses the first layer of each. See
-~Remote.parse~ in [[https://github.com/selkies-project/sealskin/blob/main/server/app/prootapps.py][server/app/prootapps.py]] and the "PRoot Apps remotes" section
-of SealSkin's ~docs/content/registries.md~. Because of that:
+with the icons under ~metadata/img/~. It installs the first layer of the image
+~ghcr.io/<owner>/<repo>:<name>~ (see ~Remote.parse~ in SealSkin's
+[[https://github.com/selkies-project/sealskin/blob/main/server/app/prootapps.py][server/app/prootapps.py]]). So the metadata has to be on ~master~, and the
+images have to be public on ghcr.io or pullable with the node's ghcr.io
+credential.
 
-- the metadata has to be on the ~master~ branch, and
-- the images have to be pullable from ghcr.io (see below).
-
-A remote can also be given as a base URL and a registry, one space apart. That
-form serves the metadata from any branch:
+A remote can also be a base URL and a registry, one space apart. That form
+serves the metadata from any branch:
 
 #+begin_example
 https://raw.githubusercontent.com/queitsch/proot-apps/<branch> ghcr.io/queitsch/proot-apps
 #+end_example
 
-* Building and publishing
+* For Users
 
-~.github/workflows/build-on-commit.yml~ builds every app whose ~apps/<name>/~
-folder changed on a push to ~master~. It pushes the app to
-~ghcr.io/<owner>/<repo>:<name>~ for the architectures in
-~metadata/metadata.yml~. Run the workflow by hand with /Build and push all apps/
-to build everything.
-
-The apps build on the public base images of linuxserver/proot-apps
-(~ghcr.io/linuxserver/proot-apps:alpine-324~), so this repository builds no
-base images of its own.
-
-GitHub publishes a new container package as private, and the package does not
-take on the repository's visibility. See [[https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry][Working with the Container registry]]
-and [[https://docs.github.com/en/packages/learn-github-packages/configuring-a-packages-access-control-and-visibility][Configuring a package's access control and visibility]]. After the first
-build, open the ~proot-apps~ package, go to *Package settings*, then *Danger
-Zone*, then *Change visibility*, and pick *Public*. Public images can be pulled
-anonymously. The other choice is to give the SealSkin nodes a credential for
-ghcr.io.
-
-* Using the apps without SealSkin
-
-With [[https://github.com/linuxserver/proot-apps#install-or-update][proot-apps]] installed:
+With [[https://github.com/linuxserver/proot-apps#install-or-update][proot-apps]] installed, install, update or remove an app by its full endpoint:
 
 #+begin_src sh
 proot-apps install ghcr.io/queitsch/proot-apps:emacs
+proot-apps update ghcr.io/queitsch/proot-apps:emacs
+proot-apps remove ghcr.io/queitsch/proot-apps:emacs
 #+end_src
 
-* Building an app locally
+** emacs
+
+GNU Emacs from Alpine's ~emacs-pgtk~ and ~emacs-gtk3~ packages, two builds of
+the same release in one app:
+
+| Binary                         | Build          | Used when                                            |
+|--------------------------------+----------------+------------------------------------------------------|
+| ~/usr/bin/emacs~               | pure GTK, pgtk | the session has a Wayland socket                     |
+| ~/usr/libexec/emacs-x11/emacs~ | GTK3 on X11    | there is no Wayland socket but ~DISPLAY~ is set      |
+
+Set ~PA_EMACS_BACKEND=pgtk~ or ~PA_EMACS_BACKEND=x11~ to force a build. The
+packages conflict, so the X11 binary and its fingerprinted ~.pdmp~ come from a
+second build stage. Both packages ship identical Lisp. From the command line
+the app is ~emacs-pa~.
+
+* For Developers
+
+This repository follows the build logic of [[https://github.com/linuxserver/proot-apps#for-developers][linuxserver/proot-apps]], with one
+difference: the apps build on the base images that linuxserver/proot-apps
+publishes (~ghcr.io/linuxserver/proot-apps:<base>~), so no base images are
+built here. Set the ~BASE_REPO~ build argument to use the base images of
+another repository.
+
+- ~build-on-commit~ builds every app whose ~apps/<name>/~ folder changed on a
+  push to ~master~ and pushes it to ~ghcr.io/<owner>/<repo>:<name>~ for the
+  architectures in ~metadata/metadata.yml~. Run it by hand with /Build and push
+  all apps/ to build everything.
+- ~Daily Package check~ rebuilds each app with [[https://github.com/anchore/syft][syft]] and commits a changed
+  ~apps/<name>/package_versions.txt~, which makes ~build-on-commit~ rebuild that
+  app. It needs a [[https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions][GitHub Secret]] ~PAT~ with write access to the repository.
+- ~template-readme~ writes this README from ~ci-scripts/README.template~ and
+  ~metadata/metadata.yml~.
+
+GitHub publishes a new container package as private, and a package does not
+take on its repository's visibility ([[https://docs.github.com/en/packages/learn-github-packages/configuring-a-packages-access-control-and-visibility][docs]]). After the first build, open the
+package's *Package settings* and use *Change visibility* to make it public.
+
+** Building local apps
+
+With Docker and proot-apps installed, build an app and extract it into your
+proot-apps folder:
 
 #+begin_src sh
-cd apps/emacs
-docker build --build-arg REPO=queitsch/proot-apps -t local-emacs .
+./build-install-local emacs
 #+end_src
 
-The image is a single layer. Extract it into
-~$HOME/proot-apps/ghcr.io_queitsch_proot-apps_emacs/~ the way
-linuxserver/proot-apps' ~build-install-local~ does, then run it:
+** Adding a new app
 
-#+begin_src sh
-proot-apps run ghcr.io/queitsch/proot-apps:emacs
-#+end_src
+Follow [[https://github.com/linuxserver/proot-apps#adding-a-new-app][Adding a new app]] in the linuxserver/proot-apps README:
 
-* Adding an app
-
-Follow "Adding a new app" in the [[https://github.com/linuxserver/proot-apps#adding-a-new-app][linuxserver/proot-apps README]]:
-
-1. Create ~apps/<name>/~ with ~Dockerfile~, ~entrypoint~, ~install~ and ~remove~.
-2. Add an entry to ~metadata/metadata.yml~ with ~name~, ~full_name~, ~arch~,
+1. Create ~apps/<name>/~ with ~Dockerfile~, ~entrypoint~, ~install~ and ~remove~,
+   copying an existing app as a start.
+2. Add the app to ~metadata/metadata.yml~ with ~name~, ~full_name~, ~arch~,
    ~category~, ~icon~ and ~description~.
-3. Put the icon in ~metadata/img/~.
+3. Put its logo in ~metadata/img/~, svg preferred, otherwise a 192x192 png.

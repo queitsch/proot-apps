@@ -1,33 +1,22 @@
 #!/bin/bash
 
-# Pick the Emacs build for the session:
-#   Wayland session -> pure GTK (pgtk) build, native Wayland
-#   X11 session     -> GTK3 build for X11
-# Set PA_EMACS_BACKEND=pgtk or PA_EMACS_BACKEND=x11 to force one.
-
-wayland_socket() {
-  [ -n "${WAYLAND_DISPLAY}" ] || return 1
-  case "${WAYLAND_DISPLAY}" in
-    /*) [ -S "${WAYLAND_DISPLAY}" ] ;;
-    *) [ -n "${XDG_RUNTIME_DIR}" ] && [ -S "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}" ] ;;
-  esac
-}
-
-BACKEND="${PA_EMACS_BACKEND}"
-if [ -z "${BACKEND}" ]; then
-  if wayland_socket; then
-    BACKEND=pgtk
+# Use the pure GTK build on Wayland and the GTK3 build on X11, set
+# PA_EMACS_BACKEND to pgtk or x11 to force one
+if [ -z "${PA_EMACS_BACKEND}" ]; then
+  if [[ "${WAYLAND_DISPLAY}" == /* ]] && [ -S "${WAYLAND_DISPLAY}" ]; then
+    PA_EMACS_BACKEND=pgtk
+  elif [ -n "${WAYLAND_DISPLAY}" ] && [ -S "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}" ]; then
+    PA_EMACS_BACKEND=pgtk
   elif [ -n "${DISPLAY}" ]; then
-    BACKEND=x11
+    PA_EMACS_BACKEND=x11
   else
-    BACKEND=pgtk
+    PA_EMACS_BACKEND=pgtk
   fi
 fi
 
-if [ "${BACKEND}" == "x11" ]; then
-  export GDK_BACKEND=x11
-  exec /usr/libexec/emacs-x11/emacs "$@"
+# Start Emacs
+if [ "${PA_EMACS_BACKEND}" == "x11" ]; then
+  GDK_BACKEND=x11 /usr/libexec/emacs-x11/emacs "$@"
 else
-  export GDK_BACKEND=wayland
-  exec /usr/bin/emacs "$@"
+  GDK_BACKEND=wayland /usr/bin/emacs "$@"
 fi

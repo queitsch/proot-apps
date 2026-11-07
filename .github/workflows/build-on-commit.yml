@@ -1,9 +1,7 @@
 name: build-on-commit
 
-# Builds every app whose folder under apps/ changed and pushes it to
-# ghcr.io/<owner>/<repo>:<app>, the image SealSkin and proot-apps install.
-# Adapted from linuxserver/proot-apps. The apps build on the public base
-# images of linuxserver/proot-apps, so no base image is built here.
+# Adapted from linuxserver/proot-apps, the apps build on the base images
+# published by linuxserver/proot-apps so no base images are built here
 
 on:
   push:
@@ -60,7 +58,6 @@ jobs:
           docker buildx build --push
           --platform ${{ matrix.arch }}
           --build-arg REPO=${GITHUB_REPOSITORY,,}
-          --label org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}
           --tag ghcr.io/${GITHUB_REPOSITORY,,}:${{ matrix.name }} .
     strategy:
       fail-fast: false

@@ -1,6 +1,4 @@
-# Ignore editor files:
+# Ignore vim files:
 *~
 *.swp
 *.swo
-\#*\#
-.\#*
