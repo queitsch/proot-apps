@@ -2,6 +2,8 @@
 
 # This file is generated from ci-scripts/README.template and metadata/metadata.yml, edit those instead
 
+* This is an archive, new repo here: https://github.com/queitsch/lsio-proot-apps
+
 A [[https://github.com/linuxserver/proot-apps][PRoot Apps]] repository laid out like linuxserver/proot-apps. A
 [[https://github.com/selkies-project/sealskin][SealSkin]] PRoot Apps catalog can use it as a remote by its GitHub ~owner/repo~.
 
